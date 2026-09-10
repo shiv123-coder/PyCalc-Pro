@@ -16,6 +16,6 @@
     "scripting"
   ],
   "host_permissions": [
-    "*://*.sudoku.com/*"
+    "<all_urls>"
   ]
 }
