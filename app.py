@@ -230,7 +230,15 @@ st.markdown("""
     /* Hide Streamlit defaults for cleaner look */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
+    header {visibility: hidden !important;}
     .stDeployButton {display: none;}
+    [data-testid="stToolbar"] {visibility: hidden !important;}
+    
+    /* Hide Streamlit Cloud "Manage app" badge */
+    div[data-testid="viewerBadge"] {display: none !important;}
+    .viewerBadge_container {display: none !important;}
+    .viewerBadge_link {display: none !important;}
+    div[class*="viewerBadge"] {display: none !important;}
 
     /* Expander styling */
     .streamlit-expanderHeader {
@@ -250,6 +258,70 @@ st.markdown("""
     /* Fix number input width */
     .stNumberInput > div {
         width: 100%;
+    }
+    
+    /* MOBILE RESPONSIVENESS */
+    @media (max-width: 576px) {
+        .hero-title { font-size: 1.8rem; }
+        .hero-header { padding: 1.5rem; }
+        .result-value { font-size: 1.8rem; }
+        
+        /* Keypad row (7 buttons) */
+        div[data-testid="stHorizontalBlock"]:has(> div:nth-child(7):last-child) {
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(> div:nth-child(7):last-child) > div[data-testid="column"] {
+            width: calc(100% / 7) !important;
+            flex: 1 1 calc(100% / 7) !important;
+            min-width: 0 !important;
+            padding: 0 2px !important;
+        }
+
+        /* Sudoku row (9 inputs) */
+        div[data-testid="stHorizontalBlock"]:has(> div:nth-child(9):last-child) {
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(> div:nth-child(9):last-child) > div[data-testid="column"] {
+            width: calc(100% / 9) !important;
+            flex: 1 1 calc(100% / 9) !important;
+            min-width: 0 !important;
+            padding: 0 1px !important;
+        }
+        
+        /* Hide number input spinners on mobile to save space */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+
+        /* Matrix rows and 2-col inputs (2 to 5 columns containing number inputs) */
+        div[data-testid="stHorizontalBlock"]:has(.stNumberInput):has(> div:nth-child(2):last-child),
+        div[data-testid="stHorizontalBlock"]:has(.stNumberInput):has(> div:nth-child(3):last-child),
+        div[data-testid="stHorizontalBlock"]:has(.stNumberInput):has(> div:nth-child(4):last-child),
+        div[data-testid="stHorizontalBlock"]:has(.stNumberInput):has(> div:nth-child(5):last-child) {
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.stNumberInput) > div[data-testid="column"] {
+            min-width: 0 !important;
+            width: auto !important;
+            flex: 1 1 auto !important;
+        }
+        
+        /* Info Cards (4 columns) wrap to 2x2 grid */
+        div[data-testid="stHorizontalBlock"]:has(.info-card) {
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.info-card) > div[data-testid="column"] {
+            width: 50% !important;
+            flex: 1 1 50% !important;
+            min-width: 50% !important;
+            padding-bottom: 0.5rem !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
