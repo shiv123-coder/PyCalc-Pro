@@ -45,28 +45,56 @@
     }
 
     // 2. DOM Extraction Logic for Sudoku.com
-    // Target the 81 cells in the grid by trying multiple known class names
-    const selectorsToTry = [
-        '.game-cell', 
-        '.cell', 
-        '.sudoku-cell', 
-        '.grid-cell', 
-        '.game-grid-cell',
-        '[data-cell]',
-        'table td'
-    ];
-    
-    let cells = null;
-    for (let selector of selectorsToTry) {
-        let elements = document.querySelectorAll(selector);
-        // Sometimes there are multiple boards (e.g., mini-maps). The main board usually has 81.
-        if (elements.length >= 81) {
-            // If it's more than 81, just take the first 81 (usually the main grid)
-            cells = Array.from(elements).slice(0, 81);
-            console.log(`PyCalc Pro: Found 81 cells using selector '${selector}'`);
-            break;
+    function findSudokuCells() {
+        // 1. Try known classes
+        const classes = ['.game-cell', '.cell', '.sudoku-cell', '.grid-cell', '[data-cell]'];
+        for (let c of classes) {
+            let els = document.querySelectorAll(c);
+            if (els.length === 81) return Array.from(els);
+            if (els.length > 81) return Array.from(els).slice(0, 81);
         }
+
+        // 2. Look for any container that has exactly 81 children
+        let allElements = document.querySelectorAll('*');
+        for (let el of allElements) {
+            if (el.children.length === 81 && el.tagName.toLowerCase() !== 'svg' && el.tagName.toLowerCase() !== 'body') {
+                return Array.from(el.children);
+            }
+        }
+
+        // 3. Look for a 9x9 table/grid structure
+        for (let el of allElements) {
+            if (el.children.length === 9) {
+                let cells = [];
+                let valid = true;
+                for (let child of el.children) {
+                    if (child.children.length !== 9) { valid = false; break; }
+                    cells.push(...Array.from(child.children));
+                }
+                if (valid && cells.length === 81) return cells;
+            }
+        }
+
+        // 4. Try SVG elements (Sudoku.com sometimes uses an SVG overlay)
+        let svgs = document.querySelectorAll('svg');
+        for (let svg of svgs) {
+            let tagCounts = {};
+            let children = svg.querySelectorAll('*');
+            for (let child of children) {
+                let tag = child.tagName.toLowerCase();
+                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+            }
+            for (let tag in tagCounts) {
+                if (tagCounts[tag] === 81 || tagCounts[tag] === 162) { // Sometimes 2 layers per cell
+                    return Array.from(svg.querySelectorAll(tag)).slice(0, 81);
+                }
+            }
+        }
+        
+        return null;
     }
+
+    let cells = findSudokuCells();
 
     if (!cells || cells.length !== 81) {
         alert("PyCalc Pro: Could not find exactly 81 cells on this page. Website DOM might have changed.");
