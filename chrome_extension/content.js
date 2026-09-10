@@ -45,9 +45,30 @@
     }
 
     // 2. DOM Extraction Logic for Sudoku.com
-    // Target the 81 cells in the grid
-    const cells = document.querySelectorAll('.game-cell');
-    if (cells.length !== 81) {
+    // Target the 81 cells in the grid by trying multiple known class names
+    const selectorsToTry = [
+        '.game-cell', 
+        '.cell', 
+        '.sudoku-cell', 
+        '.grid-cell', 
+        '.game-grid-cell',
+        '[data-cell]',
+        'table td'
+    ];
+    
+    let cells = null;
+    for (let selector of selectorsToTry) {
+        let elements = document.querySelectorAll(selector);
+        // Sometimes there are multiple boards (e.g., mini-maps). The main board usually has 81.
+        if (elements.length >= 81) {
+            // If it's more than 81, just take the first 81 (usually the main grid)
+            cells = Array.from(elements).slice(0, 81);
+            console.log(`PyCalc Pro: Found 81 cells using selector '${selector}'`);
+            break;
+        }
+    }
+
+    if (!cells || cells.length !== 81) {
         alert("PyCalc Pro: Could not find exactly 81 cells on this page. Website DOM might have changed.");
         return;
     }
@@ -123,7 +144,7 @@
 
     // 4. Inject the solved numbers back into the webpage
     // Target the on-screen number pad (sudoku.com specific)
-    const numpadItems = document.querySelectorAll('.numpad-item, .game-numpad-button, .numpad-button, .game-numpad .game-cell');
+    const numpadItems = document.querySelectorAll('.numpad-item, .game-numpad-button, .numpad-button, .game-numpad .game-cell, .keypad-button, .number-button, [data-action^="number"], [data-value]');
     let numpadMap = {}; 
     numpadItems.forEach(item => {
         let text = item.innerText.trim();
@@ -131,6 +152,14 @@
              let match = item.innerHTML.match(/val(?:ue)?-(\d)/i);
              if (match) text = match[1];
         }
+        if (!text && item.hasAttribute('data-value')) {
+             text = item.getAttribute('data-value');
+        }
+        if (!text && item.hasAttribute('data-action')) {
+             let match = item.getAttribute('data-action').match(/\d/);
+             if (match) text = match[0];
+        }
+        
         if (text >= '1' && text <= '9') {
             numpadMap[parseInt(text)] = item;
         }
